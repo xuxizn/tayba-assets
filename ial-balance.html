@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>فاحص ميزان المراجعة</title>
+<style>
+  * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Arial, sans-serif; }
+  body { margin: 0; background: #f0f4f8; color: #1e293b; }
+  header { background: linear-gradient(135deg, #0f172a, #1e40af); color: white; padding: 25px 20px; text-align: center; }
+  header h1 { margin: 0 0 8px; font-size: 26px; }
+  header p { margin: 0; opacity: .85; font-size: 14px; }
+  .container { max-width: 1200px; margin: 20px auto; padding: 0 15px; }
+  .card { background: white; border-radius: 14px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 14px rgba(0,0,0,.06); }
+  .card h2 { margin: 0 0 15px; font-size: 18px; color: #0f172a; border-right: 4px solid #1e40af; padding-right: 10px; }
+  .toolbar { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 15px; }
+  .btn { padding: 10px 16px; border: none; border-radius: 8px; font-size: 14px; cursor: pointer; font-weight: 600; transition: .2s; }
+  .btn-primary { background: #1e40af; color: white; }
+  .btn-primary:hover { background: #1e3a8a; }
+  .btn-success { background: #16a34a; color: white; }
+  .btn-success:hover { background: #15803d; }
+  .btn-danger { background: #dc2626; color: white; }
+  .btn-danger:hover { background: #b91c1c; }
+  .btn-gray { background: #e2e8f0; color: #1e293b; }
+  .btn-gray:hover { background: #cbd5e1; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { padding: 8px 6px; border-bottom: 1px solid #e2e8f0; text-align: right; font-size: 14px; }
+  th { background: #f1f5f9; font-weight: 700; }
+  th:nth-child(2), th:nth-child(3), td:nth-child(2), td:nth-child(3) { text-align: center; width: 130px; }
+  th:last-child, td:last-child { width: 50px; text-align: center; }
+  input[type="text"], input[type="number"] {
+    width: 100%; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; outline: none; font-family: inherit;
+  }
+  input:focus { border-color: #1e40af; box-shadow: 0 0 0 3px rgba(30,64,175,.1); }
+  input[type="number"] { text-align: center; -moz-appearance: textfield; }
+  input[type="number"]::-webkit-outer-spin-button,
+  input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  .del-btn { background: #fee2e2; color: #dc2626; border: none; width: 32px; height: 32px; border-radius: 6px; cursor: pointer; font-size: 18px; line-height: 1; }
+  .del-btn:hover { background: #fecaca; }
+  .totals-row td { background: #f8fafc; font-weight: 700; font-size: 15px; padding: 12px 6px; border-top: 2px solid #1e40af; }
+  .status-box { padding: 18px; border-radius: 12px; text-align: center; margin-top: 15px; font-weight: 700; font-size: 16px; }
+  .status-balanced { background: #dcfce7; color: #166534; border: 2px solid #16a34a; }
+  .status-unbalanced { background: #fee2e2; color: #991b1b; border: 2px solid #dc2626; }
+  .status-box .big { font-size: 22px; display: block; margin-bottom: 6px; }
+  .diff-value { font-size: 28px; color: #dc2626; font-weight: 800; margin: 6px 0; }
+  .diagnostics { margin-top: 15px; }
+  .diag-item { background: #fef9c3; border-right: 4px solid #eab308; padding: 12px 14px; border-radius: 8px; margin-bottom: 10px; font-size: 14px; line-height: 1.6; }
+  .diag-item strong { color: #854d0e; display: block; margin-bottom: 4px; font-size: 15px; }
+  .diag-item.success { background: #dcfce7; border-color: #16a34a; }
+  .diag-item.success strong { color: #166534; }
+  .diag-item.danger { background: #fee2e2; border-color: #dc2626; }
+  .diag-item.danger strong { color: #991b1b; }
+  .learn-section { line-height: 1.9; font-size: 14px; }
+  .learn-section details { margin-bottom: 10px; background: #f8fafc; border-radius: 8px; padding: 10px 14px; border-right: 4px solid #1e40af; }
+  .learn-section summary { cursor: pointer; font-weight: 700; color: #0f172a; font-size: 15px; padding: 4px 0; }
+  .learn-section details[open] summary { margin-bottom: 8px; }
+  .learn-section ul { padding-right: 20px; margin: 6px 0; }
+  .learn-section li { margin-bottom: 6px; }
+  .empty-hint { color: #94a3b8; text-align: center; padding: 20px; font-size: 14px; }
+  @media (max-width: 700px) {
+    header h1 { font-size: 20px; }
+    th, td { font-size: 13px; padding: 6px 4px; }
+    th:nth-child(2), th:nth-child(3), td:nth-child(2), td:nth-child(3) { width: 90px; }
+    .card { padding: 14px; }
+    .diff-value { font-size: 22px; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>📊 فاحص ميزان المراجعة</h1>
+  <p>أدخل الحسابات، وسيتم فحص الميزان تلقائياً واكتشاف الأخطاء</p>
+</header>
+
+<div class="container">
+
+  <div class="card">
+    <h2>1. إدخال بيانات ميزان المراجعة</h2>
+    <div class="toolbar">
+      <button class="btn btn-primary" onclick="addRow()">➕ إضافة حساب</button>
+      <button class="btn btn-gray" onclick="loadSample()">تحميل مثال</button>
+      <button class="btn btn-gray" onclick="clearAll()">🗑️ مسح الكل</button>
+      <button class="btn btn-success" onclick="window.print()">🖨️ طباعة</button>
+    </div>
+    <div style="overflow-x:auto;">
+      <table id="tbTable">
+        <thead>
+          <tr>
+            <th>اسم الحساب</th>
+            <th>مدين (Debit)</th>
+            <th>دائن (Credit)</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="tbBody"></tbody>
+        <tfoot>
+          <tr class="totals-row">
+            <td>الإجمالي</td>
+            <td id="totalDebit">0.00</td>
+            <td id="totalCredit">0.00</td>
+            <td></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>2. نتيجة الفحص</h2>
+    <div id="statusBox" class="status-box status-balanced">
+      <span class="big">✓ الميزان متوازن</span>
+      <span>المدين = الدائن</span>
+    </div>
+    <div class="diagnostics" id="diagnostics"></div>
+  </div>
+
+  <div class="card">
+    <h2>3. تعليمات وأخطاء شائعة في ميزان المراجعة</h2>
+    <div class="learn-section">
+      <details>
+        <summary>🔍 ما هو ميزان المراجعة؟</summary>
+        هو كشف يحتوي على أرصدة جميع الحسابات في نهاية الفترة، مقسمة إلى عمودين: <b>مدين</b> و <b>دائن</b>. الهدف منه التأكد من أن مجموع الأرصدة المدينة = مجموع الأرصدة الدائنة (لأن كل قيد محاسبي متوازن بطبيعته).
+      </details>
+      <details>
+        <summary>⚠️ لماذا لا يتوازن الميزان؟ (أخطاء تُكشف)</summary>
+        <ul>
+          <li><b>خطأ في الترحيل:</b> ترحيل مبلغ من القيد إلى الحساب بمبلغ مختلف.</li>
+          <li><b>خطأ في الجمع:</b> خطأ حسابي عند جمع الأرصدة.</li>
+          <li><b>تسجيل قيد في الجانب الخطأ:</b> تسجيل مبلغ في المدين بدلاً من الدائن أو العكس.</li>
+          <li><b>إغفال تسجيل طرف واحد من القيد.</b></li>
+          <li><b>ترحيل مبلغ مقلوب الأرقام (Transposition):</b> مثل 540 تكتب 450.</li>
+          <li><b>تكرار ترحيل نفس الحساب مرتين.</b></li>
+        </ul>
+      </details>
+      <details>
+        <summary>🎯 سر الأرقام: كيف تعرف نوع الخطأ من قيمة الفرق؟</summary>
+        <ul>
+          <li>إذا كان الفرق <b>يقبل القسمة على 2</b> → احتمال كبير أنك سجلت مبلغاً في الجانب الخطأ. اقسم الفرق على 2 وابحث عن مبلغ بهذا الرقم في القيود.</li>
+          <li>إذا كان الفرق <b>يقبل القسمة على 9</b> → احتمال خطأ تبديل الأرقام (Transposition)، مثال: 81 بدل 18، الفرق = 63 (يقبل القسمة على 9).</li>
+          <li>إذا كان الفرق <b>صغيراً جداً</b> (مثل 1 أو 0.5) → غالباً خطأ في الجمع.</li>
+          <li>إذا كان الفرق <b>يساوي ضعف مبلغ معين</b> → تسجيل المبلغ في الجانب المعاكس.</li>
+        </ul>
+      </details>
+      <details>
+        <summary>✅ أخطاء لا يكشفها الميزان (خطر!)</summary>
+        رغم توازن الميزان، قد توجد أخطاء لا تظهر، منها:
+        <ul>
+          <li>تسجيل قيد صحيح بمبلغ خاطئ <b>في طرفي القيد معاً</b> (خطأ متبادل).</li>
+          <li>إغفال تسجيل القيد بالكامل (طرفي المدين والدائن).</li>
+          <li>تكرار قيد كامل في الطرفين.</li>
+          <li>ترحيل القيد إلى حساب خاطئ لكن بنفس الطبيعة (مدين بمدين).</li>
+        </ul>
+        لهذا لا يكفي الميزان وحده، بل يجب المطابقة مع دفاتر اليومية والأستاذ.
+      </details>
+      <details>
+        <summary>📌 معادلة ميزان المراجعة</summary>
+        <div style="background:#0f172a;color:#fff;padding:12px;border-radius:8px;text-align:center;font-size:15px;margin-top:8px;">
+          مجموع الأرصدة المدينة = مجموع الأرصدة الدائنة
+        </div>
+        <p style="margin-top:8px;">إذا اختلف الطرفان، يوجد خطأ لا بد من تصحيحه قبل إعداد القوائم المالية.</p>
+      </details>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const STORAGE_KEY = 'trial_balance_data_v1';
+let rowCounter = 0;
+
+function createRow(name = '', debit = '', credit = '') {
+  const tbody = document.getElementById('tbBody');
+  const tr = document.createElement('tr');
+  const id = 'r' + (rowCounter++);
+  tr.id = id;
+  tr.innerHTML = `
+    <td><input type="text" placeholder="مثال: الصندوق" value="${escapeAttr(name)}" oninput="saveData()"></td>
+    <td><input type="number" step="0.01" placeholder="0.00" value="${escapeAttr(debit)}" oninput="calculate()"></td>
+    <td><input type="number" step="0.01" placeholder="0.00" value="${escapeAttr(credit)}" oninput="calculate()"></td>
+    <td><button class="del-btn" onclick="deleteRow('${id}')">×</button></td>
+  `;
+  tbody.appendChild(tr);
+}
+
+function escapeAttr(s) {
+  return String(s).replace(/"/g, '&quot;').replace(/</g, '&lt;');
+}
+
+function addRow() {
+  createRow();
+  saveData();
+}
+
+function deleteRow(id) {
+  const row = document.getElementById(id);
+  if (row) row.remove();
+  calculate();
+  saveData();
+}
+
+function clearAll() {
+  if (!confirm('هل أنت متأكد من مسح كل البيانات؟')) return;
+  document.getElementById('tbBody').innerHTML = '';
+  addRow();
+  addRow();
+  addRow();
+  calculate();
+  saveData();
+}
+
+function loadSample() {
+  document.getElementById('tbBody').innerHTML = '';
+  const sample = [
+    ['الصندوق', 50000, ''],
+    ['البنك', 120000, ''],
+    ['العملاء (المدينون)', 80000, ''],
+    ['المخزون', 60000, ''],
+    ['الأثاث', 40000, ''],
+    ['رأس المال', '', 200000],
+    ['الدائنون', '', 45000],
+    ['قروض', '', 70000],
+    ['المبيعات', '', 85000],
+    ['المشتريات', 50000, ''],
+    ['مصروف رواتب', 30000, ''],
+    ['مصروف إيجار', 20000, '']
+  ];
+  sample.forEach(r => createRow(r[0], r[1], r[2]));
+  calculate();
+  saveData();
+}
+
+function calculate() {
+  const rows = document.querySelectorAll('#tbBody tr');
+  let totalDebit = 0, totalCredit = 0;
+  rows.forEach(tr => {
+    const inputs = tr.querySelectorAll('input');
+    const d = parseFloat(inputs[1].value) || 0;
+    const c = parseFloat(inputs[2].value) || 0;
+    totalDebit += d;
+    totalCredit += c;
+  });
+
+  document.getElementById('totalDebit').textContent = totalDebit.toFixed(2);
+  document.getElementById('totalCredit').textContent = totalCredit.toFixed(2);
+
+  const diff = totalDebit - totalCredit;
+  const statusBox = document.getElementById('statusBox');
+  const diagnostics = document.getElementById('diagnostics');
+
+  if (Math.abs(diff) < 0.005) {
+    statusBox.className = 'status-box status-balanced';
+    statusBox.innerHTML = `
+      <span class="big">✓ الميزان متوازن</span>
+      <span>مجموع المدين = مجموع الدائن = ${totalDebit.toFixed(2)}</span>
+    `;
+    diagnostics.innerHTML = `
+      <div class="diag-item success">
+        <strong>🎉 ممتاز!</strong>
+        الميزان متوازن، لكن تذكر: التوازن لا يعني بالضرورة عدم وجود أخطاء. تأكد من عدم وجود أخطاء متبادلة أو أخطاء في المبلغ نفسه في طرفي القيد.
+      </div>
+    `;
+  } else {
+    statusBox.className = 'status-box status-unbalanced';
+    statusBox.innerHTML = `
+      <span class="big">✗ الميزان غير متوازن</span>
+      <span>الفرق:</span>
+      <div class="diff-value">${Math.abs(diff).toFixed(2)}</div>
+      <span>${diff > 0 ? 'المدين أكبر من الدائن' : 'الدائن أكبر من المدين'}</span>
+    `;
+
+    const absDiff = Math.abs(diff);
+    let html = '<div class="diag-item danger"><strong>⚠️ يوجد خطأ يجب تصحيحه</strong>الميزان لا يتوازن، راجع القيود والترحيلات.</div>';
+
+    // تحليل الفرق
+    if (Math.abs(absDiff % 2) < 0.005) {
+      const half = absDiff / 2;
+      html += `<div class="diag-item"><strong>💡 فرضية 1: مبلغ مسجل في الجانب الخطأ</strong>
+        الفرق (${absDiff.toFixed(2)}) يقبل القسمة على 2. ابحث عن مبلغ يساوي <b>${half.toFixed(2)}</b> ربما تم تسجيله في الجانب المعاكس. صحّحه بتسجيله في الجانب الصحيح.</div>`;
+    }
+
+    if (Math.abs(absDiff % 9) < 0.005) {
+      html += `<div class="diag-item"><strong>💡 فرضية 2: خطأ تبديل أرقام (Transposition)</strong>
+        الفرق (${absDiff.toFixed(2)}) يقبل القسمة على 9. هذا مؤشر قوي على خطأ تبديل أرقام، مثال: كتبت 540 بدل 450، أو 81 بدل 18. راجع الأرقام المتشابهة في القيود.</div>`;
+    }
+
+    if (absDiff < 10) {
+      html += `<div class="diag-item"><strong>💡 فرضية 3: خطأ في الجمع</strong>
+        الفرق صغير جداً (${absDiff.toFixed(2)})، قد يكون خطأً في عملية جمع الأرصدة. أعد جمع كل عمود يدوياً.</div>`;
+    }
+
+    // كشف صفوف فيها مدين ودائن في نفس الوقت
+    let hasBothSides = false;
+    rows.forEach(tr => {
+      const inputs = tr.querySelectorAll('input');
+      const d = parseFloat(inputs[1].value) || 0;
+      const c = parseFloat(inputs[2].value) || 0;
+      if (d > 0 && c > 0) {
+        hasBothSides = true;
+        const name = inputs[0].value || '(بدون اسم)';
+        html += `<div class="diag-item"><strong>⚠️ ملاحظة على الحساب: ${escapeAttr(name)}</strong>
+          هذا الحساب يحتوي على مبلغ في المدين ومبلغ في الدائن في نفس الوقت. عادةً يوضع الرصيد في جانب واحد فقط (صافي الرصيد)، إلا إذا كان الهدف بيان حركة.</div>`;
+      }
+    });
+
+    // كشف صفوف فارغة
+    let emptyRows = 0;
+    rows.forEach(tr => {
+      const inputs = tr.querySelectorAll('input');
+      const name = inputs[0].value.trim();
+      const d = parseFloat(inputs[1].value) || 0;
+      const c = parseFloat(inputs[2].value) || 0;
+      if (!name && d === 0 && c === 0) emptyRows++;
+    });
+    if (emptyRows > 0) {
+      html += `<div class="diag-item"><strong>📝 صفوف فارغة</strong>يوجد ${emptyRows} صف فارغ، يمكنك حذفها للحفاظ على الوضوح.</div>`;
+    }
+
+    html += `<div class="diag-item"><strong>📋 خطوات التصحيح المقترحة</strong>
+      <ol style="padding-right:20px;margin:6px 0;">
+        <li>راجع قيود اليومية وتحقق من توازن كل قيد (مدين = دائن).</li>
+        <li>راجع الترحيلات إلى دفتر الأستاذ.</li>
+        <li>تحقق من عملية جمع الأرصدة في كل حساب.</li>
+        <li>ابحث عن مبلغ يساوي الفرق أو نصفه أو ضعفه في القيود.</li>
+        <li>بعد التصحيح، أعد إدخال الأرصدة هنا للتحقق.</li>
+      </ol>
+    </div>`;
+
+    diagnostics.innerHTML = html;
+  }
+
+  saveData();
+}
+
+function saveData() {
+  const rows = document.querySelectorAll('#tbBody tr');
+  const data = [];
+  rows.forEach(tr => {
+    const inputs = tr.querySelectorAll('input');
+    data.push({
+      name: inputs[0].value,
+      debit: inputs[1].value,
+      credit: inputs[2].value
+    });
+  });
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  } catch(e) {}
+}
+
+function loadData() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const data = JSON.parse(raw);
+      if (Array.isArray(data) && data.length > 0) {
+        data.forEach(r => createRow(r.name, r.debit, r.credit));
+        calculate();
+        return;
+      }
+    }
+  } catch(e) {}
+  // بيانات افتراضية
+  addRow(); addRow(); addRow();
+}
+
+// تشغيل
+loadData();
+</script>
+</body>
+</html>
